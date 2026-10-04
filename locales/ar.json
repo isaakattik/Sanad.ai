@@ -1,0 +1,11 @@
+
+{
+    "file_exists": "الملف موجود بالفعل في {file_path}. سيتم تخطي التنزيل.",
+    "start_download": "جاري تنزيل الملف...",
+    "api_failed": "فشل طلب واجهة برمجة التطبيقات (API): {status}",
+    "download_complete": "تم حفظ {count} آية في {file_path}",
+    "status_matched": "مطابقة تامة مباشرة 🎯",
+    "status_matched_with_diff": "مطابقة مع وجود اختلاف لفظي ⚠️",
+    "status_no_reference" : "لا يوجد مرجع كافٍ ❌",
+    "status_too_short" : "آية صغيرة للمطابقة, يرجى إعادة ادخال آية أطول"
+}

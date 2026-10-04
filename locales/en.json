@@ -1,0 +1,11 @@
+
+{
+    "file_exists":"File already exists at {file_path}. Skipping download.",
+    "start_download":"Starting download...",
+    "api_failed": "API request failed: {status}",
+    "download_complete": "Saved {count} ayahs to {file_path}",
+    "status_matched": "Direct exact match 🎯",
+    "status_matched_with_diff": "Match with a Fuzzy difference ⚠️",
+    "status_no_reference" : "Insufficient reference ❌",
+    "status_too_short":"The verse is too short for a match, please re-enter a longer verse."
+}
