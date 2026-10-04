@@ -4,5 +4,8 @@
     "file_exists": "الملف موجود بالفعل في {file_path}. سيتم تخطي التنزيل.",
     "start_downlaod": "جاري تنزيل الملف...",
     "api_failed": "فشل طلب واجهة برمجة التطبيقات (API): {status}",
-    "download_complet": "تم حفظ {count} آية في {file_path}"
+    "download_complet": "تم حفظ {count} آية في {file_path}",
+    "status_exact_match": "مطابقة تامة مباشرة 🎯",
+    "status_fuzzy_match": "مطابقة مع وجود اختلاف لفظي ⚠️",
+    "status_no_match" : "لا يوجد مرجع كافٍ ❌"
 }

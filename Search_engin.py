@@ -4,6 +4,7 @@ from rapidfuzz import fuzz, process
 import json
 from pathlib import Path
 from build_normalized import normalize_arabic
+from i18n import notify
 
 file_path = Path("Database") / "quran_normalized.json"
 
@@ -47,7 +48,7 @@ def find_exact(input_user:str, quran_data:str, min_word=3, status_callback=None)
 quran_normalized = [ayah["norma_text"] for ayah in dataset]
 
 
-def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3) -> list:
+def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, status_callback=None) -> list:
     
     normalized_input = normalize_arabic(user_input)
     
@@ -57,7 +58,7 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3) -> li
     matches = process.extract(
         normalized_input, 
         quran_normalized,
-        scorer = fuzz.partial_ratio,limit=3
+        scorer = fuzz.partial_ratio,limit=limit
     )
     
     results= []
@@ -65,18 +66,38 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3) -> li
         ayah_words = ayah[0]
         ayah_words = ayah_words.split()
         index = ayah[2]
+        score = ayah[1]
         matcher = SequenceMatcher(None, user_words, ayah_words)
         diffs = []
         
         ayah_data= dataset[index]
         for tag, i1,i2,j1,j2 in matcher.get_opcodes():
             
-            if tag != "equal":
+            if tag == "equal":
+                            diffs.append({
+                                "type":tag
+                            })
+            elif tag in ("replace", "delete"):
                 diffs.append({
                     "type":tag,
                     "user_words": user_words[i1:i2],
                     "ayah_words":ayah_words[j1:j2]
                 })
+                            
+            elif tag == "insert":
+                if 0 < i1 and i2 < len(user_words):
+                    diffs.append({
+                        "type":tag,
+                        "user_words":user_words[i1:i2],
+                        "ayah_words":ayah_words[j1:j2]
+                    })
+                    
+            if score == 100 and len(diffs) == 1:
+                status = notify(status_callback,"status_exact_match")
+            elif score >= 80 :
+                status = notify(status_callback,"status_fuzzy_match")
+            else:
+                status = notify(status_callback,"status_no_match")
                 
                 
         results.append({
@@ -85,8 +106,9 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3) -> li
             "ayah_number": ayah_data["ayah_number"],
             "text": ayah_data["text"],
             "text_normalized":ayah_data["norma_text"],
-            "score": matches[1],
-            "Differences":diffs
+            "score": ayah[1],
+            "Differences":diffs ,
+            "match_type": status
         })
         
     return results
