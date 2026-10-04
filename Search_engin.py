@@ -21,7 +21,6 @@ def find_exact(input_user:str, quran_data:str, min_word=3, status_callback=None)
     
     
     if len(words) < min_word:
-        print(f"⚠️ Search query is too short. Please enter at least {min_word} words.")
         return []
     
     results = []
@@ -41,3 +40,5 @@ def find_exact(input_user:str, quran_data:str, min_word=3, status_callback=None)
                 "Ayah": ayah["text"],
                 "Match" : match_type
             })
+            
+    return results
