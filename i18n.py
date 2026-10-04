@@ -8,7 +8,7 @@ _cached_translations = {}
 
 def load_translations():
     global _cached_translations
-    file_path = Path("locals") / f"{current_lang}.json"
+    file_path = Path("locales") / f"{current_lang}.json"
     
     if file_path.exists():
         with open(file_path, 'r', encoding="utf-8") as f:

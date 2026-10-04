@@ -3,8 +3,8 @@ from difflib import SequenceMatcher
 from rapidfuzz import fuzz, process
 import json
 from pathlib import Path
-from build_normalized import normalize_arabic
-from i18n import notify
+from normalize import normalize_arabic
+from i18n import notify, t
 
 file_path = Path("Database") / "quran_normalized.json"
 
@@ -48,13 +48,18 @@ def find_exact(input_user:str, quran_data:str, min_word=3, status_callback=None)
 quran_normalized = [ayah["norma_text"] for ayah in dataset]
 
 
-def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, status_callback=None) -> list:
+def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, min_word:int = 3,status_callback=None) -> list:
     
     normalized_input = normalize_arabic(user_input)
     
     user_words= normalized_input.split()
     
-    
+    if len(user_words) < min_word:
+        if status_callback:
+            status_callback(t("status_too_short"))
+        return []
+        
+
     matches = process.extract(
         normalized_input, 
         quran_normalized,
@@ -91,11 +96,11 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, statu
                     })
                     
         if score == 100 and len(diffs) == 0:
-            status = notify(status_callback,"status_exact_match")
+            status = "matched"
         elif score >= 80 :
-            status = notify(status_callback,"status_fuzzy_match")
+            status = "matched_with_diff"
         else:
-            status = notify(status_callback,"status_no_match")
+            status = "no_reference"
                 
                 
         results.append({
@@ -111,5 +116,23 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, statu
         
     return results
                 
-
+def verify_quote(quote:str, status_callback=None, min_word:int = 3):
+    words = normalize_arabic(quote).split()
+    
+    if len(words) < min_word:
+        
+        final_status = "too_short"
+        results= []
+    else:
+        results = find_fuzzy(quote, min_word=min_word)
+        final_status = results[0]["match_type"] if results else "no_reference"
             
+        if status_callback:
+                status_callback(t(f"status_{final_status}"))
+                
+        return {
+            "status": final_status,
+            "best_match": results[0] if results else None ,
+            "all_candidates": results 
+        }
+

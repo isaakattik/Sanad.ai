@@ -34,7 +34,7 @@ def recive_data(url=API_URL, output_file="quran.json", status_callback=None):
         with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    notify(status_callback, "start_downlaod")
+    notify(status_callback, "start_download")
     response = requests.get(url or API_URL)
     response.raise_for_status()
 
@@ -65,12 +65,11 @@ def recive_data(url=API_URL, output_file="quran.json", status_callback=None):
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(quran_data, f, ensure_ascii=False, indent=2)
 
-    notify(status_callback,"download_complet", count=len(quran_data),file_path=file_path)
+    notify(status_callback,"download_complete", count=len(quran_data),file_path=file_path)
     return quran_data
 
 
 if __name__ == "__main__":
     recive_data(status_callback=print)
     
-data = recive_data(status_callback=print)
 
