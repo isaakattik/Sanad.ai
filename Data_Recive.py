@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 import requests
 from dotenv import load_dotenv
-
+from i18n import notify
 load_dotenv()
 
 API_URL = os.getenv("quran_data_api_link")
@@ -30,17 +30,17 @@ def recive_data(url=API_URL, output_file="quran.json", status_callback=None):
     file_path = folder_path / output_file
 
     if file_path.exists():
-        update_status(f"File already exists at {file_path}. Skipping download.")
+        notify(status_callback,"file_exists",file_path = file_path)
         with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    update_status("Starting download...")
+    notify(status_callback, "start_downlaod")
     response = requests.get(url or API_URL)
     response.raise_for_status()
 
     payload = response.json()
     if payload.get("code") != 200:
-        update_status(f"API request failed: {payload.get('status')}")
+        notify(status_callback,"api_failed",status= payload.get("status"))
         return None
 
     quran_data = []
@@ -65,7 +65,7 @@ def recive_data(url=API_URL, output_file="quran.json", status_callback=None):
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(quran_data, f, ensure_ascii=False, indent=2)
 
-    update_status(f"Saved {len(quran_data)} ayahs to {file_path}")
+    notify(status_callback,"download_complet", count=len(quran_data),file_path=file_path)
     return quran_data
 
 
