@@ -1,7 +1,7 @@
 
 {
-    "File Existe":"File already exists at {file_path}. Skipping download.",
-    "Start Downlaod":"Starting download...",
-    "API Failed": "API request failed: {payload.get('status')}",
-    "Download Complet": "Saved {len(quran_data)} ayahs to {file_path}"
+    "file_exists":"File already exists at {file_path}. Skipping download.",
+    "start_downlaod":"Starting download...",
+    "api_failed": "API request failed: {status}",
+    "download_complet": "Saved {count} ayahs to {file_path}"
 }

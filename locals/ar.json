@@ -1,8 +1,8 @@
 
 
 {
-    "File Existe": "الملف موجود بالفعل في {file_path}. سيتم تخطي التنزيل.",
-    "Start Downlaod": "جاري تنزيل الملف...",
-    "API Failed": "فشل طلب واجهة برمجة التطبيقات (API): {payload.get('status')}",
-    "Download Complet": "تم حفظ {len(quran_data)} آية في {file_path}"
+    "file_exists": "الملف موجود بالفعل في {file_path}. سيتم تخطي التنزيل.",
+    "start_downlaod": "جاري تنزيل الملف...",
+    "api_failed": "فشل طلب واجهة برمجة التطبيقات (API): {status}",
+    "download_complet": "تم حفظ {count} آية في {file_path}"
 }
