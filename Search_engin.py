@@ -74,9 +74,7 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, statu
         for tag, i1,i2,j1,j2 in matcher.get_opcodes():
             
             if tag == "equal":
-                            diffs.append({
-                                "type":tag
-                            })
+                pass
             elif tag in ("replace", "delete"):
                 diffs.append({
                     "type":tag,
@@ -92,12 +90,12 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, statu
                         "ayah_words":ayah_words[j1:j2]
                     })
                     
-            if score == 100 and len(diffs) == 1:
-                status = notify(status_callback,"status_exact_match")
-            elif score >= 80 :
-                status = notify(status_callback,"status_fuzzy_match")
-            else:
-                status = notify(status_callback,"status_no_match")
+        if score == 100 and len(diffs) == 0:
+            status = notify(status_callback,"status_exact_match")
+        elif score >= 80 :
+            status = notify(status_callback,"status_fuzzy_match")
+        else:
+            status = notify(status_callback,"status_no_match")
                 
                 
         results.append({

@@ -36,10 +36,12 @@ def t(key:str, **kwargs) ->str:
     return text
     
 def notify(callback, key, **kwargs):
-
+    msg = t(key, **kwargs)
+     
     if callback:
-        callback(t(key, **kwargs))
-
+        callback(msg)
+    return msg
+        
 
     
     
