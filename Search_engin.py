@@ -48,11 +48,10 @@ def find_exact(input_user:str, quran_data:str, min_word=3, status_callback=None)
 quran_normalized = [ayah["norma_text"] for ayah in dataset]
 
 
-def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, min_word:int = 3,status_callback=None, threeshold: int =80) -> list:
+def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, candidate_pool_size:int = 60, min_word:int = 3, status_callback=None, threeshold: int = 80) -> list:
     
     normalized_input = normalize_arabic(user_input)
-    
-    user_words= normalized_input.split()
+    user_words = normalized_input.split()
     
     if len(user_words) < min_word:
         if status_callback:
@@ -63,38 +62,35 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, min_w
     matches = process.extract(
         normalized_input, 
         quran_normalized,
-        scorer = fuzz.partial_ratio,limit=limit
+        scorer = fuzz.partial_ratio,
+        limit = candidate_pool_size
     )
     
-    results= []
+    results = []
     for ayah in matches:
-        ayah_words = ayah[0]
-        ayah_words = ayah_words.split()
+        ayah_words = ayah[0].split()
         index = ayah[2]
         score = ayah[1]
         matcher = SequenceMatcher(None, user_words, ayah_words)
         diffs = []
         
-        ayah_data= dataset[index]
-        for tag, i1,i2,j1,j2 in matcher.get_opcodes():
-            
+        ayah_data = dataset[index]
+        for tag, i1, i2, j1, j2 in matcher.get_opcodes():
             if tag == "equal":
                 pass
             elif tag in ("replace", "delete"):
                 diffs.append({
-                    "type":tag,
+                    "type": tag,
                     "user_words": user_words[i1:i2],
-                    "ayah_words":ayah_words[j1:j2]
+                    "ayah_words": ayah_words[j1:j2]
                 })
-                            
             elif tag == "insert":
                 if 0 < i1 and i2 < len(user_words):
                     diffs.append({
-                        "type":tag,
-                        "user_words":user_words[i1:i2],
-                        "ayah_words":ayah_words[j1:j2]
+                        "type": tag,
+                        "user_words": user_words[i1:i2],
+                        "ayah_words": ayah_words[j1:j2]
                     })
-                    
 
         matching_words = sum(block.size for block in matcher.get_matching_blocks())
         coverage = matching_words / len(user_words) if user_words else 0
@@ -106,13 +102,12 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, min_w
         else:
             status = "no_reference"
                 
-        
         results.append({
             "surah_name": ayah_data["surah_name"],
             "surah_number": ayah_data["surah_number"],
             "ayah_number": ayah_data["ayah_number"],
             "text": ayah_data["text"],
-            "text_normalized":ayah_data["norma_text"],
+            "text_normalized": ayah_data["norma_text"],
             "score": ayah[1],
             "coverage": round(coverage, 2),
             "differences": diffs,
@@ -120,7 +115,7 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, min_w
         })
         
     results.sort(key=lambda x: (x["coverage"], x["score"]), reverse=True)
-    return results
+    return results[:limit]
                 
 def verify_quote(quote:str, status_callback=None, min_word:int = 3, threshold: int = 80):
     words = normalize_arabic(quote).split()
