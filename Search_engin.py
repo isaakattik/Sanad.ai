@@ -110,7 +110,7 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, min_w
             "text": ayah_data["text"],
             "text_normalized":ayah_data["norma_text"],
             "score": ayah[1],
-            "Differences":diffs ,
+            "differences":diffs ,
             "match_type": status
         })
         

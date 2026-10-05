@@ -1,6 +1,6 @@
 
 {
-    "file_exists": "الملف موجود بالفعل في {file_path}. سيتم تخطي التنزيل.",
+    "file_exists": "الملف المعالج موجود بالفعل في {file_path}. سيتم تخطي إعادة المعالجة.",
     "start_download": "جاري تنزيل الملف...",
     "api_failed": "فشل طلب واجهة برمجة التطبيقات (API): {status}",
     "download_complete": "تم حفظ {count} آية في {file_path}",
