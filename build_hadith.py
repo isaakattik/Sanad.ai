@@ -27,7 +27,7 @@ def clean_raw_text(text:str) -> str:
 
 def buid_hadith_dataset():
     
-    output_path = Path("Dataset") / "hadith_normalized.json"
+    output_path = Path("Database") / "hadith_normalized.json"
     
     if output_path.exists():
         print(f"The File already Exists in {output_path}, Skipping Loading.")
