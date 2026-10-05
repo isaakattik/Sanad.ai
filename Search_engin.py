@@ -48,7 +48,7 @@ def find_exact(input_user:str, quran_data:str, min_word=3, status_callback=None)
 quran_normalized = [ayah["norma_text"] for ayah in dataset]
 
 
-def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, min_word:int = 3,status_callback=None) -> list:
+def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, min_word:int = 3,status_callback=None, threeshold: int =80) -> list:
     
     normalized_input = normalize_arabic(user_input)
     
@@ -97,7 +97,7 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, min_w
                     
         if score == 100 and len(diffs) == 0:
             status = "matched"
-        elif score >= 80 :
+        elif score >= threeshold :
             status = "matched_with_diff"
         else:
             status = "no_reference"
@@ -116,7 +116,7 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, min_w
         
     return results
                 
-def verify_quote(quote:str, status_callback=None, min_word:int = 3):
+def verify_quote(quote:str, status_callback=None, min_word:int = 3, threshold: int = 80):
     words = normalize_arabic(quote).split()
     
     if len(words) < min_word:
@@ -124,7 +124,7 @@ def verify_quote(quote:str, status_callback=None, min_word:int = 3):
         final_status = "too_short"
         results= []
     else:
-        results = find_fuzzy(quote, min_word=min_word)
+        results = find_fuzzy(quote, min_word=min_word,threeshold=threshold)
         final_status = results[0]["match_type"] if results else "no_reference"
             
     if status_callback:
