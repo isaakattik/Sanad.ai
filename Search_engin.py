@@ -95,14 +95,18 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, min_w
                         "ayah_words":ayah_words[j1:j2]
                     })
                     
-        if score == 100 and len(diffs) == 0:
+
+        matching_words = sum(block.size for block in matcher.get_matching_blocks())
+        coverage = matching_words / len(user_words) if user_words else 0
+
+        if score == 100 and len(diffs) == 0 and coverage >= 0.7:
             status = "matched"
-        elif score >= threeshold :
+        elif score >= threeshold and coverage >= 0.7:
             status = "matched_with_diff"
         else:
             status = "no_reference"
                 
-                
+        
         results.append({
             "surah_name": ayah_data["surah_name"],
             "surah_number": ayah_data["surah_number"],
@@ -110,10 +114,12 @@ def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, min_w
             "text": ayah_data["text"],
             "text_normalized":ayah_data["norma_text"],
             "score": ayah[1],
-            "differences":diffs ,
+            "coverage": round(coverage, 2),
+            "differences": diffs,
             "match_type": status
         })
         
+    results.sort(key=lambda x: (x["coverage"], x["score"]), reverse=True)
     return results
                 
 def verify_quote(quote:str, status_callback=None, min_word:int = 3, threshold: int = 80):
