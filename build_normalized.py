@@ -27,7 +27,7 @@ def build_normalized_dataset(
         notify(status_callback,"file_exists",file_path = output_path)
     else:
         with open(output_path, "w", encoding="utf-8") as file:
-            json.dump(data, file, indent=4)
+            json.dump(data, file, indent=4, ensure_ascii=False)
 
 if __name__ == "__main__":
     build_normalized_dataset()
