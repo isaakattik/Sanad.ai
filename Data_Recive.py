@@ -10,9 +10,6 @@ API_URL = os.getenv("quran_data_api_link")
 
 
 def recive_data(url=API_URL, output_file="quran.json", status_callback=None):
-    def update_status(msg):
-        if status_callback:
-            status_callback(msg)
             
     def clean_ayah_text(text, surah_number, ayah_in_surah):
         
@@ -69,7 +66,20 @@ def recive_data(url=API_URL, output_file="quran.json", status_callback=None):
     return quran_data
 
 
+def recive_hadith_data(book_name= "bukhari"):
+    
+    url = f"https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-{book_name}.json"
+    
+    response = requests.get(url)
+    if response.status_code == 200:
+        data= response.json()
+        print(data["hadiths"])
+    
+    else:
+        return []
+
+
 if __name__ == "__main__":
-    recive_data(status_callback=print)
+    recive_hadith_data()
     
 
