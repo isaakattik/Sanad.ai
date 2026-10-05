@@ -127,12 +127,12 @@ def verify_quote(quote:str, status_callback=None, min_word:int = 3):
         results = find_fuzzy(quote, min_word=min_word)
         final_status = results[0]["match_type"] if results else "no_reference"
             
-        if status_callback:
-                status_callback(t(f"status_{final_status}"))
-                
-        return {
-            "status": final_status,
-            "best_match": results[0] if results else None ,
-            "all_candidates": results 
-        }
+    if status_callback:
+            status_callback(t(f"status_{final_status}"))
+            
+    return {
+        "status": final_status,
+        "best_match": results[0] if results else None ,
+        "all_candidates": results 
+    }
 
