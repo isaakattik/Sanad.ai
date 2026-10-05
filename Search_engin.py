@@ -7,10 +7,15 @@ from normalize import normalize_arabic
 from i18n import notify, t
 
 file_path = Path("Database") / "quran_normalized.json"
+hadith_file_path = Path("Database") / "hadith_normalized.json"
 
-with open(file_path, "r", encoding="utf-8") as f:
-    dataset = json.load(f)
-    
+if file_path.exists():
+    with open(file_path, "r", encoding="utf-8") as f:
+        dataset = json.load(f)
+
+if hadith_file_path.exists():
+        with open(hadith_file_path, 'r', encoding="utf-8") as f:
+            hadith_dataset = json.load(f)
     
 def find_exact(input_user:str, quran_data:str, min_word=3, status_callback=None):
     
@@ -26,7 +31,6 @@ def find_exact(input_user:str, quran_data:str, min_word=3, status_callback=None)
         return []
     
     results = []
-    
     for ayah in quran_data:
         
         quran_normalized = ayah["norma_text"]
@@ -46,8 +50,94 @@ def find_exact(input_user:str, quran_data:str, min_word=3, status_callback=None)
     return results
 
 quran_normalized = [ayah["norma_text"] for ayah in dataset]
+hadith_normalized = [h["norma_text"] for h in hadith_dataset]
 
+def find_hadith_fuzzy(
+    user_input:str, limit:int=5, candidate_pull_size =60 , 
+    min_word=3, threshold=85, status_callback = None, hadith_normalized= hadith_normalized
+    ) ->list :
+    
+    normalized_input = normalize_arabic(user_input)
+    user_words = normalized_input.split()
+    
+    if len(user_words) < min_word or not hadith_dataset:
+        
+        if status_callback:
+            status_callback(t("status_too_short"))
+        return []
+            
+    matches = process.extract(
+        normalized_input,
+        hadith_normalized,
+        scorer = fuzz.partial_ratio,
+        limit = candidate_pull_size
+    )
+    
+    results = []
 
+    for item in matches:
+        
+        hadith_words = item[0].split()
+        index = item[2]
+        score= item[1]
+        
+        matcher = SequenceMatcher(
+            None, user_words, hadith_words)
+        
+        diffs = []
+        
+        for tag,i1,i2,j1,j2 in matcher.get_opcodes():
+            
+            if tag in ("replace", "delete"):
+                
+                diffs.append({
+                    "type": tag,
+                    "user_words": user_words[i1:i2],
+                    "hadith_words": hadith_words[j1:j2]
+                })
+            
+            elif tag == "insert" and (0 < i1 and i2 < len(user_words)):
+                
+                diffs.append({
+                    "type":tag,
+                    "user_words":user_words[i1:i2],
+                    "hadith_words":hadith_words[j1:j2]
+                })       
+                
+                
+        matching_words = sum(b.size for b in matcher.get_matching_blocks())
+        
+        coverage = matching_words / len(user_words) if user_words else 0
+        
+        if score == 100 and len(diffs) == 0 and coverage >= 0.7:
+            
+            status = 'matched'
+        elif score >= threshold and coverage >= 0.7:
+            status = "matched_with_diff"
+            
+        else:
+            status = "no_reference"
+            
+        h_data= hadith_dataset[index]
+        
+        results.append({
+            "source_type": "hadith",
+            "source_book": h_data["source"],
+            "hadith_number": h_data["hadith_number"],
+            "text": h_data["text"],
+            "text_normalized": h_data["norma_text"],
+            "score": score,
+            "coverage": round(coverage, 2),
+            "differences": diffs,
+            "match_type": status
+        })
+        
+    results.sort(key=lambda x: (x["coverage"], x["score"]), reverse=True)
+    print(results[:limit])
+    return results[:limit]
+    
+    
+    
 def find_fuzzy(user_input:str, quran_normalized=quran_normalized, limit=3, candidate_pool_size:int = 60, min_word:int = 3, status_callback=None, threeshold: int = 80) -> list:
     
     normalized_input = normalize_arabic(user_input)
@@ -122,18 +212,42 @@ def verify_quote(quote:str, status_callback=None, min_word:int = 3, threshold: i
     
     if len(words) < min_word:
         
-        final_status = "too_short"
-        results= []
-    else:
-        results = find_fuzzy(quote, min_word=min_word,threeshold=threshold)
-        final_status = results[0]["match_type"] if results else "no_reference"
+        return {
+            "status" : "too_short", "source_type":None, "best_match" : None, "all_candidate" : []
+        }
             
+    quran_results = find_fuzzy(quote, min_word=min_word, threeshold=threshold)
+    hadith_results = find_hadith_fuzzy(quote, min_word=min_word, threshold=threshold)
+    
+    best_quran = quran_results[0] if quran_results else None
+    best_hadith = hadith_results[0] if hadith_results else None
+    
+
+    final_match = None
+    source_type = None
+    
+    if best_quran and best_quran["match_type"] in ["matched", "matched_with_diff"]:
+        final_match = best_quran
+        source_type = "quran"
+        
+    elif best_hadith and best_hadith["match_type"] in ["matched", "matched_with_diff"]:
+        final_match = best_hadith
+        source_type = "hadith"
+        
+    final_status = final_match["match_type"] if final_match else "no_reference"
+    
+    
     if status_callback:
-            status_callback(t(f"status_{final_status}"))
-            
+        status_callback(t(f"status_{final_status}"))
+        
     return {
         "status": final_status,
-        "best_match": results[0] if results else None ,
-        "all_candidates": results 
+        "source_type": source_type,
+        "best_match": final_match,
+        "all_candidates": quran_results + hadith_results
     }
 
+
+if __name__ == "__main__":
+    
+    verify_quote("إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى")
