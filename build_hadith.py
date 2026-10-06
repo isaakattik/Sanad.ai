@@ -18,14 +18,7 @@ def clean_raw_text(text:str) -> str:
     text = remove_control_chars.sub("", text)
     return re.sub(r"\s+", " ", text).strip()
 
-def extract_matn(text):
 
-    pattern = r"(صلى الله عليه وسلم|صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ)(.*?)(:|\"|)(.*)"
-    match = re.search(pattern, text)
-    if match:
-        matn = match.group(4).strip(' :"\'')
-        return matn if matn else text
-    return text
 
 def buid_hadith_dataset():
     output_path = Path("Database") / "hadith_normalized.json"
@@ -53,14 +46,12 @@ def buid_hadith_dataset():
                 continue
             
 
-            matn_only = extract_matn(clean_text)
             
             all_hadiths.append({
                 "source": source_name, 
                 "hadith_number": item.get("hadithnumber"), 
                 "text": clean_text, 
-                "norma_text": normalize_arabic(clean_text),
-                "matn_only": matn_only 
+                "norma_text": normalize_arabic(clean_text)
             })
             count += 1
             
