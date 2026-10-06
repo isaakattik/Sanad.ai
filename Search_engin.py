@@ -294,7 +294,7 @@ def verify_quote(quote:str, status_callback=None, min_word:int = 3, threshold: i
     if len(words) < min_word:
         
         return {
-            "status" : "too_short", "source_type":None, "best_match" : None, "all_candidate" : []
+            "status" : "too_short", "source_type":None, "best_match" : None, "all_candidates" : []
         }
             
     quran_results = find_fuzzy(quote, min_word=min_word, threeshold=threshold)
