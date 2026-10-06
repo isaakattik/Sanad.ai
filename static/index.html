@@ -158,7 +158,7 @@ async function verify(){
     if(!res.ok) throw new Error(res.status);
     render(await res.json());
     $("#out").scrollIntoView({behavior:"smooth",block:"nearest"});
-  }catch(e){ $("#err").textContent = "تعذّر الاتصال بالخادم. حاول مرة أخرى."; }
+  }catch(e){ $("#err").textContent = ""; }
   finally{ btn.disabled = false; btn.classList.remove("load"); $("#gol").textContent = "تحقّق"; }
 }
 $("#go").onclick = verify;
