@@ -1,178 +1,121 @@
-# 🛡️ Sanad (سند) - Verification Engine for Islamic Citations
+<div dir="rtl" align="right">
 
-> **Sanad** is a hybrid verification engine designed to authenticate Quranic and Hadith citations with strict precision, candidate pool expansion, sliding-window search, coverage-ratio filtering, and deterministic diff-alignment algorithms.
+# سَنَد — الموثِّق
 
----
+**مدقّق الاقتباسات الشرعية:** يتحقق من الآيات والأحاديث في نص مُلصَق، ويُظهر الكلمة المخالفة للأصل، ويمتنع عن الجزم حين لا يجد مرجعًا.
 
-## 📌 Key Features (Current Implementation)
+المسار الرابع: أدوات المعرفة والتحقق — تحدي الذكاء الاصطناعي في خدمة المحتوى الإسلامي.
 
-- **Quranic & Hadith Verification Pipelines:** Verifies both Quranic ayahs and Hadith texts while preserving full original texts (`text` and `norma_text`) rather than truncating to matn-only, maintaining full contextual integrity.
-- **Sliding-Window Retrieval for Hadith:** Uses a sliding-window index (`WINDOW_SIZE = 30`, `WINDOW_STEP = 15`) coupled with query word truncation (`max_query_words = 50`) to accelerate fuzzy matching without losing alignment precision.
-- **Expanded Candidate Pool Search:** Fetches `candidate_pool_size = 60` candidates via `rapidfuzz` (`fuzz.partial_ratio`) before re-ranking, preventing short ayahs (e.g., "الم", "يس") from clogging top match slots.
-- **Word Coverage & Alignment Analysis:** Employs `SequenceMatcher` to compute exact word coverage ratios ($\text{coverage} \ge 0.70$) and detect fine-grained word alterations (insertions, deletions, replacements).
-- **Deterministic Evaluation Benchmark:** Evaluation suite (`evaluate.py`) with reproducible test sets measuring False Acceptance Rate (FAR), Recall, Detection, Abstention, and Latency.
+> **أداة مساعدة للتحقق السريع**، لا تغني عن الرجوع إلى أهل العلم والمصادر الأصلية.
 
----
+**الرابط الحي:** [ضعه هنا]  |  **الفيديو:** [ضعه هنا]
 
-## 📢 Scientific Transparency & Dataset Disclosures
+## ما الذي يفعله؟
 
-1. **Test Set Purity & Retest Protocol:**
-   - Initial optimization cycles evaluated test cases prior to strict dataset splitting. Key engine mechanics (sliding windows, tail handling, and fast-path routing) were refined based on error patterns observed during early runs.
-   - To ensure absolute empirical purity going forward, once engine parameters are frozen, a fresh evaluation dataset will be generated using an unexposed seed (e.g., `--seed 7`). The `--test-set` CLI parameter in `evaluate.py` enables single-pass evaluation on new external test suites.
-2. **Small Class Sample Sizes:**
-   - Minority classes such as `hadith_outside_scope` ($N=2$) and `popular_unsourced` ($N=2$) in the tuning set contain insufficient samples to draw broad statistical generalizations.
-3. **Scholarship & Review:**
-   - 4 specific Hadith edge cases remain pending formal review by an Islamic Hadith scholar to confirm their canonical grounding and classification.
-4. **Latency Bottleneck Analysis:**
-   - Mean latency is **1.02s** (median **0.80s**). The primary latency bottlenecks occur when querying full/plain Quranic ayahs (peaking at **4.45s** on case #3 and **3.72s** on case #12). Optimization of `find_fuzzy` for long Quranic strings remains a priority.
-5. **UI & Verification Badging Principles:**
-   - When citations match with modifications ($\text{coverage} \in [0.70, 0.82]$), inserted or substituted words **must** be highlighted in red, and the official "Verified" (موثق) badge **must** be suppressed in the UI.
+يُطابَق النص المدخل مع مصادر مغلقة، فتظهر إحدى ثلاث نتائج:
 
----
+| النتيجة | معناها |
+|---|---|
+| `matched` (مطابق) | النص موافق للمصدر بعد التطبيع؛ يظهر الموضع (سورة وآية، أو كتاب ورقم حديث). |
+| `matched_with_diff` (مطابق مع اختلاف) | وُجد المصدر لكن في النص كلمات تخالفه؛ تُظلَّل الكلمات وتُسرد الفروق (استبدال، زيادة، نقص). |
+| `no_reference` (لا مرجع) | لا نص قريب بما يكفي في المصادر؛ تمتنع الأداة ولا تولّد نصًّا ولا حكمًا. |
 
-## 📊 Benchmark & Real Measured Metrics
+نص أقل من ثلاث كلمات يُرفض بحالة `too_short`.
 
-Evaluated on the **Tuning Split (`tune`)** at **Threshold = 85** across **58 cases**:
+## حالة الذكاء الاصطناعي (إفصاح صريح)
 
-### Key Metric Summary
+**لا يستخدم هذا الإصدار أي نموذج ذكاء اصطناعي.** القرار كله من معالجة لغوية كلاسيكية: تطبيع نصي، وبحث تقريبي بمكتبة `rapidfuzz`، ومحاذاة بين الكلمات بـ `difflib`، وعتبات مضبوطة بالاختبار. هذا اختيار مقصود: وظيفة التحقق تتطلب الحرفية، والنموذج التوليدي قد يصحّح التحريف أو يختلق مصدرًا.
+كانت المخططات الأولى تشمل قراءة الصور (OCR أو نموذج رؤية) وكشف الاقتباس والترجمة، لكنها **حُذفت** لضيق الوقت وكثرة الأعطال، ولا أثر لها في الشيفرة.
 
-| Metric | Measured Value | Sample Size | 95% Confidence Interval | Target Standard |
-| :--- | :---: | :---: | :---: | :--- |
-| **False-Acceptance Rate (FAR)** 🔴 | **0.0%** | 0/31 | 0.0% – 11.0% | Lower is better |
-| ↳ *Tampered returned as exact* | **0.0%** | 0/17 | 0.0% – 18.0% | 0% Target |
-| ↳ *Not-in-books accepted* | **0.0%** | 0/14 | 0.0% – 22.0% | 0% Target |
-| **Quran Recognition Accuracy** 🟢 | **100.0%** | 9/9 | 70.0% – 100.0% | High Precision |
-| **Hadith Recognition Accuracy** 🟢 | **100.0%** | 15/15 | 80.0% – 100.0% | High Precision |
-| **Tampered Quotes Detected** 🎯 | **94.1%** | 16/17 | 73.0% – 99.0% | High Recall |
-| ↳ *Quran Tampered Detected* | **90.9%** | 10/11 | 62.0% – 98.0% | — |
-| ↳ *Hadith Tampered Detected* | **100.0%** | 6/6 | 61.0% – 100.0% | — |
-| **Tampered Safely Refused** 🛡️ | **5.9%** | 1/17 | 1.0% – 27.0% | Safe Miss |
-| **Abstention Rate (Not in books)** 🟡 | **100.0%** | 14/14 | 78.0% – 100.0% | Complete Rejection |
-| **Too-Short Input Guard** 🛑 | **100.0%** | 3/3 | 44.0% – 100.0% | Early Guardrail |
-| **Source Accuracy (Quran/Hadith)** 🧭 | **98.3%** | 57/58 | 91.0% – 100.0% | High Classification |
-| **Returned Reference == Origin** 📍 | **94.3%** | 33/35 | 81.0% – 98.0% | Informational |
+## المصادر
 
-### Performance & Query Latency
+| المصدر | المحتوى | الجهة | الترخيص |
+|---|---|---|---|
+| القرآن الكريم (6,236 آية، الرسم العثماني) | `Database/quran.json` | واجهة `api.alquran.cloud` | [وثّق الترخيص] |
+| صحيح البخاري (7,580) وصحيح مسلم (7,360) والأربعون النووية (42) | `Database/hadith_normalized.json` | مستودع `fawazahmed0/hadith-api` | [وثّق الترخيص] |
 
-- **Mean Latency:** `1.02s`
-- **Median Latency:** `0.80s`
-- **95th Percentile (p95):** `3.43s`
-- **Max Latency:** `4.45s` (*Slowest cases: #3 correct_quran_full 4.45s \| #12 correct_quran_plain 3.72s \| #4 correct_quran_full 3.43s*)
+المدونة مغلقة: ما خارجها لا يُحكم عليه، بل يُمتنع. ولا يُنقل حكم الحديث من النموذج، والكتب المعتمدة هي الصحيحان والأربعون النووية.
 
----
+## كيف يعمل؟
 
-## 🗂️ Category Outcome Breakdown
+1. **التطبيع:** حذف التشكيل والتطويل وتوحيد الألف والياء والهمزات، دون دمج التاء المربوطة بالهاء.
+2. **المسار الحرفي السريع (الأحاديث):** بحث عن النص الفرعي على حدود الكلمات.
+3. **الاسترجاع:** بحث تقريبي في نوافذ من 40 كلمة بخطوة 10 على أول 30 كلمة من الاستعلام (الحد الأقصى للتحقق 150 كلمة). النص الكامل لا يُقصّ في البحث ولا في العرض.
+4. **المحاذاة:** مقارنة كلمة بكلمة مع النص الكامل، وحساب التغطية وتصنيف الفروق.
+5. **القرار:** عتبة التشابه المجمَّدة **85**، مع حد أدنى ثلاث كلمات.
 
-| Category | Outcomes Count | Status |
-| :--- | :--- | :---: |
-| `correct_quran_full` | `correct=3` | 🟢 Passed |
-| `correct_quran_partial` | `correct=3` | 🟢 Passed |
-| `correct_quran_plain` | `correct=3` | 🟢 Passed |
-| `modified_quran` | `detected=7`, `safe_miss=1` | 🎯 Detected / Safe Refusal |
-| `extended_quran` | `detected=3` | 🎯 Detected |
-| `correct_hadith` | `correct=6` | 🟢 Passed |
-| `correct_hadith_plain` | `correct=2` | 🟢 Passed |
-| `long_hadith` | `correct=2` | 🟢 Passed |
-| `modified_hadith` | `detected=6` | 🎯 Detected |
-| `famous_hadith` | `correct=5` | 🟢 Passed |
-| `famous_too_short` | `guard_ok=1` | 🛑 Guardrail OK |
-| `hadith_outside_scope` | `rejected=2` | 🟡 Rejected |
-| `popular_unsourced` | `rejected=2` | 🟡 Rejected |
-| `pseudo_quran` | `rejected=5` | 🟡 Rejected |
-| `general_fabricated` | `rejected=5` | 🟡 Rejected |
-| `short_input` | `guard_ok=2` | 🛑 Guardrail OK |
-
----
-
-## 🚧 Work in Progress & Roadmap
-
-- [x] **Hadith Verification Database:** Integrated sliding-window indexing and rapid fuzzy retrieval for Hadith datasets.
-- [x] **Zero FAR & High Recall Thresholding:** Achieved 0.0% FAR and 94.1% tampered detection at threshold 85.
-- [ ] **Quran Search Optimization:** Accelerating `find_fuzzy` for long Quranic ayahs to reduce p95 latency below 1.5s.
-- [ ] **Vision OCR Processing:** Automatic image-based citation extraction via Gemini / GPT Vision APIs.
-- [ ] **Interactive Web Dashboard:** Modern Web GUI with inline diff rendering (highlighting alterations in RED) and conditional badge suppression.
-
----
-
-## 🏗️ System Architecture
-
-```text
-               [ Input Citation Quote ]
-                          │
-                          ▼
-              [ Text Normalization ]
-    (Strip Tashkeel, Normalize Alef/Yaa/Taa)
-                          │
-            ┌─────────────┴─────────────┐
-            ▼                           ▼
-  [ Quran Fuzzy Pool ]        [ Hadith Window Pool ]
-(Candidate Pool Size = 60)   (Sliding Windows + Query Limit)
-            │                           │
-            └─────────────┬─────────────┘
-                          ▼
-            [ SequenceMatcher & Diff Engine ]
-            (Word-level Diffs & Coverage >= 70%)
-                          │
-                          ▼
-            [ Candidate Ranking & Selection ]
-            (Sorted by Coverage & Fuzzy Score)
-                          │
-                          ▼
-              [ Verification Report ]
-       (Matched / Matched_with_Diff / No_Reference)
-```
-
----
-
-## 🛠️ Tech Stack
-
-- **Language:** Python 3.10+
-- **Databases:** Local Normalized JSON Datasets (`quran_normalized.json`, `hadith_normalized.json`)
-- **Core Libraries:** `rapidfuzz`, `difflib` (`SequenceMatcher`), `requests`, `python-dotenv`
-
----
-
-## 🚀 Getting Started
-
-### 1. Clone the Repository & Setup Environment
+## التشغيل
 
 ```bash
 git clone https://github.com/isaakattik/Sanad.ai.git
 cd Sanad.ai
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate        # على ويندوز: venv\Scripts\activate
+pip install -r requirements.txt -r requirements-gui.txt
+uvicorn app:app --reload        # ثم افتح http://127.0.0.1:8000
 ```
 
-### 2. Install Dependencies
+قاعدة البيانات مضمَّنة في `Database/`، فلا حاجة إلى ملف `.env` للتشغيل. أما إعادة جلب بيانات القرآن بـ `Data_Recive.py` فتحتاج `.env` فيه `quran_data_api_link` (انظر `.env.example`).
+شغّل الأمر من جذر المستودع، فالمسارات نسبية. وافتح الصفحة عبر العنوان أعلاه، لا بنقر الملف `static/index.html` مباشرة.
+نقطة الواجهة البرمجية: `POST /api/verify` بجسم `{"text": "..."}`، والتوثيق التلقائي في `/docs`.
+
+## الاختبار والقياس
 
 ```bash
-pip install -r requirements.txt
+python full_test.py --seed 42                 # يولّد Database/test_set.json (106 حالة، 16 فئة)
+python evaluate.py --details                  # قياس مجموعة الضبط (tune) بعتبة 85
+python evaluate.py -t 80 85 90                # مسح العتبات على مجموعة الضبط فقط
+python evaluate.py --split test -t 85 --final # القياس النهائي: مرة واحدة، ويُسجَّل
+python evaluate.py --split all --final --test-set holdout_seed7.json   # مجموعة جديدة ببذرة مختلفة
 ```
 
-### 3. Environment Variables Setup
+التقسيم طبقي ببذرة ثابتة (58 ضبط، 48 قياس). ولا يعمل `--split test` بدون `--final`. تُحفظ التقارير في `reports/`.
 
-Create a `.env` file in the root directory and configure the data endpoint:
+### النتائج (مجموعة الضبط، 58 حالة، عتبة 85)
 
-```ini
-quran_data_api_link="https://api.alquran.cloud/v1/quran/quran-uthmani"
+| المقياس | النتيجة | فترة الثقة 95% |
+|---|---|---|
+| قبول خاطئ (نص محرَّف أو مختلق) | 0 من 31 | 0 – 11% |
+| تعرّف الآيات الصحيحة | 9 من 9 | 70 – 100% |
+| تعرّف الأحاديث الصحيحة | 15 من 15 | 80 – 100% |
+| كشف النص المحرَّف | 16 من 17 | 73 – 99% |
+| الامتناع عند غياب المرجع | 14 من 14 | 78 – 100% |
+| زمن الاستعلام | متوسط 1.02 ث، وسيط 0.80 ث، p95 3.43 ث | — |
+
+**القياس النهائي (مجموعة test):** [يُدرج بعد التشغيل الوحيد]
+**المقارنة مع نموذج لغوي عام:** لم تُجرَ.
+
+## الحدود والإفصاح العلمي
+
+- المجموعة اصطناعية وصغيرة؛ الأرقام مؤشر لا ضمان، وفترات الثقة واسعة. وفئات `hadith_outside_scope` و`popular_unsourced` في مجموعة الضبط حالتان لكل منهما فقط.
+- في بدايات التطوير شُغِّلت المجموعة كاملة قبل إضافة التقسيم، فمجموعة القياس ليست محجوبة تمامًا. والمقترح مجموعة جديدة ببذرة مختلفة بعد تجميد المحرك.
+- الحالة 29 من القرآن: وُجدت الآية (28:62) بدرجة 82.98، دون العتبة 85، فكان الناتج امتناعًا آمنًا. والحالتان 23 و55 يتكرر نصهما في أكثر من موضع، فأرجع المحرك موضعًا غير الذي سجّله المولّد.
+- أربع عينات من «أحاديث خارج القاعدة» في المولّد كُتبت دون مراجعة شرعية رسمية، وتنتظر مراجعة مختص.
+- الآيات أبطأ من الأحاديث (حتى 4.45 ث)، وتحسين `find_fuzzy` مؤجَّل.
+- نطاق الأداة: القرآن والصحيحان والأربعون النووية فقط؛ حديث صحيح في كتاب آخر يُمتنع عنه.
+
+## الهيكل
+
+```text
+app.py                  خادم FastAPI (POST /api/verify) وتقديم الصفحة
+static/index.html       الواجهة (صفحة واحدة)
+Search_engin.py         محرك المطابقة والتحقق (verify_quote)
+normalize.py            التطبيع العربي
+full_test.py            مولّد مجموعة الاختبار
+evaluate.py             المقيّم: المقاييس وفترات الثقة وسجل القياس النهائي
+Data_Recive.py, build_hadith.py, build_normalized.py   جلب البيانات وبناؤها
+Database/               المصادر المطبَّعة ومجموعة الاختبار
+reports/                نتائج القياس
+i18n.py, locales/       ملفات اللغات (غير مفعَّلة في الواجهة الحالية)
 ```
 
-### 4. Run Evaluation Benchmark
+## ما أُنجز قبل التحدي
 
-Run standard evaluation on the tuning set:
+أول التزام في سجل Git بتاريخ 2026-10-04 07:53 (باسم «Start Project»)، وكل ما في هذا المستودع كُتب خلال أيام التحدي.
+أي عمل سابق خارج المستودع: [اذكره أو احذف هذا السطر].
 
-```bash
-python evaluate.py --split tune --threshold 85
-```
+## الاعتمادات
 
-Run evaluation with detailed case-by-case outcome outputs:
+`rapidfuzz` (البحث التقريبي)، و`fastapi` و`uvicorn` (الخادم)، و`requests` و`python-dotenv` (جلب البيانات). الترخيص: MIT.
 
-```bash
-python evaluate.py --split tune --threshold 85 --details
-```
-
-Run evaluation on a fresh test set using a custom path:
-
-```bash
-python evaluate.py --test-set test_suite_seed7.json
-```
+</div>
