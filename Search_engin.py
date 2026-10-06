@@ -133,7 +133,6 @@ def find_hadith_fuzzy(
         })
         
     results.sort(key=lambda x: (x["coverage"], x["score"]), reverse=True)
-    print(results[:limit])
     return results[:limit]
     
     
@@ -223,16 +222,25 @@ def verify_quote(quote:str, status_callback=None, min_word:int = 3, threshold: i
     best_hadith = hadith_results[0] if hadith_results else None
     
 
-    final_match = None
-    source_type = None
-    
-    if best_quran and best_quran["match_type"] in ["matched", "matched_with_diff"]:
-        final_match = best_quran
+    valid_quran = best_quran if (best_quran and best_quran["match_type"] in ["matched", "matched_with_diff"]) else None
+    valid_hadith = best_hadith if (best_hadith and best_hadith["match_type"] in ["matched", "matched_with_diff"]) else None
+
+    if valid_quran and valid_hadith:
+        if (valid_hadith["coverage"], valid_hadith["score"]) > (valid_quran["coverage"], valid_quran["score"]):
+            final_match = valid_hadith
+            source_type = "hadith"
+        else:
+            final_match = valid_quran
+            source_type = "quran"
+    elif valid_quran:
+        final_match = valid_quran
         source_type = "quran"
-        
-    elif best_hadith and best_hadith["match_type"] in ["matched", "matched_with_diff"]:
-        final_match = best_hadith
+    elif valid_hadith:
+        final_match = valid_hadith
         source_type = "hadith"
+    else:
+        final_match = None
+        source_type = "none"
         
     final_status = final_match["match_type"] if final_match else "no_reference"
     
