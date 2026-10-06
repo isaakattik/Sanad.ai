@@ -124,7 +124,7 @@ def find_hadith_fuzzy(
         
         hadith_words = h_data["norma_text"].split()
         matcher = SequenceMatcher(None, user_words, hadith_words)        
-            
+
         diffs = []
         
         for tag,i1,i2,j1,j2 in matcher.get_opcodes():
@@ -159,7 +159,7 @@ def find_hadith_fuzzy(
         else:
             status = "no_reference"
             
-        h_data= hadith_dataset[index]
+        h_data= hadith_dataset[original_index]
         
         results.append({
             "source_type": "hadith",
