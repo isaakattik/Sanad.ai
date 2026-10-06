@@ -17,6 +17,32 @@ if hadith_file_path.exists():
         with open(hadith_file_path, 'r', encoding="utf-8") as f:
             hadith_dataset = json.load(f)
     
+    
+    
+WINDOW_SIZE = 30   
+WINDOW_STEP = 15   
+
+hadith_windows = []     
+hadith_window_map = []  
+
+for idx, h in enumerate(hadith_dataset):
+    words = h["norma_text"].split()
+    if len(words) <= WINDOW_SIZE:
+
+        hadith_windows.append(h["norma_text"])
+        hadith_window_map.append(idx)
+    else:
+
+        for start in range(0, len(words) - WINDOW_SIZE + 1, WINDOW_STEP):
+            window_text = " ".join(words[start:start + WINDOW_SIZE])
+            hadith_windows.append(window_text)
+            hadith_window_map.append(idx)    
+    
+    
+    
+    
+    
+
 def find_exact(input_user:str, quran_data:str, min_word=3, status_callback=None):
     
     def update_status(msg):
@@ -54,11 +80,16 @@ hadith_normalized = [h["norma_text"] for h in hadith_dataset]
 
 def find_hadith_fuzzy(
     user_input:str, limit:int=5, candidate_pull_size =60 , 
-    min_word=3, threshold=85, status_callback = None, hadith_normalized= hadith_normalized
+    min_word=3, threshold=85, status_callback = None, hadith_normalized= hadith_normalized, max_query_words:int = 50, window_ouverlap:int = 12,
     ) ->list :
     
     normalized_input = normalize_arabic(user_input)
     user_words = normalized_input.split()
+    
+    if len(user_words) > max_query_words:
+        user_words = user_words[:max_query_words]
+    normalized_input = " ".join(user_words)
+    
     
     if len(user_words) < min_word or not hadith_dataset:
         
@@ -66,24 +97,34 @@ def find_hadith_fuzzy(
             status_callback(t("status_too_short"))
         return []
             
+    if len(user_words) > max_query_words:
+        user_words = user_words[:max_query_words]
+        normalized_input = " ".join(user_words)        
+    
     matches = process.extract(
         normalized_input,
-        hadith_normalized,
+        hadith_windows,
         scorer = fuzz.partial_ratio,
         limit = candidate_pull_size
     )
     
     results = []
-
+    seen_indices = set()
     for item in matches:
         
-        hadith_words = item[0].split()
-        index = item[2]
-        score= item[1]
+        window_index = item[2]
+        original_index = hadith_window_map[window_index]
         
-        matcher = SequenceMatcher(
-            None, user_words, hadith_words)
+        if original_index in seen_indices:
+            continue
+        seen_indices.add(original_index)
+
+        h_data = hadith_dataset[original_index]
+        score = item[1]
         
+        hadith_words = h_data["norma_text"].split()
+        matcher = SequenceMatcher(None, user_words, hadith_words)        
+            
         diffs = []
         
         for tag,i1,i2,j1,j2 in matcher.get_opcodes():
