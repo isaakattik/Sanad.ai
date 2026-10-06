@@ -42,6 +42,29 @@ def outcome_of(case: dict, result: dict) -> str:
     exp_source = case["expected_source"]
     status = result["status"]
     source = result.get("source_type") or "none"
+    
+    if exp_status == "too_short":
+        return "guard_ok" if status == "too_short" else "guard_failed"
+
+    if exp_status == "no_reference":
+        return "rejected" if status == "no_reference" else "FALSE_ACCEPT"
+
+    if exp_status == "matched":
+        if status == "matched" and source == exp_source:
+            return "correct"
+        if status == "matched_with_diff" and source == exp_source:
+            return "downgraded"
+        if status == "no_reference":
+            return "missed"
+        return "wrong_source"
+
+    if exp_status == "matched_with_diff":
+        if status == "matched_with_diff":
+            return "detected"
+        if status == "matched":
+            return "FALSE_ACCEPT"
+        return "safe_miss"
+    return "unknown"
 
  
 

@@ -1,0 +1,114 @@
+{
+  "threshold": 85,
+  "split": "tune",
+  "n_cases": 58,
+  "far": [
+    0,
+    31
+  ],
+  "tampered_as_exact": [
+    0,
+    17
+  ],
+  "fabricated_accepted": [
+    0,
+    14
+  ],
+  "quran_recognised": [
+    9,
+    9
+  ],
+  "hadith_recognised": [
+    15,
+    15
+  ],
+  "tampered_detected": [
+    16,
+    17
+  ],
+  "tampered_detected_quran": [
+    10,
+    11
+  ],
+  "tampered_detected_hadith": [
+    6,
+    6
+  ],
+  "tampered_safe_miss": [
+    1,
+    17
+  ],
+  "abstention": [
+    14,
+    14
+  ],
+  "guard": [
+    3,
+    3
+  ],
+  "source_accuracy": [
+    57,
+    58
+  ],
+  "reference_ok": [
+    33,
+    35
+  ],
+  "latency": {
+    "mean": 1.0163102276893714,
+    "median": 0.8033942574984394,
+    "p95": 3.428127780000068,
+    "max": 4.452024805999827
+  },
+  "by_category": {
+    "correct_quran_full": {
+      "correct": 3
+    },
+    "correct_quran_partial": {
+      "correct": 3
+    },
+    "correct_quran_plain": {
+      "correct": 3
+    },
+    "modified_quran": {
+      "detected": 7,
+      "safe_miss": 1
+    },
+    "extended_quran": {
+      "detected": 3
+    },
+    "correct_hadith": {
+      "correct": 6
+    },
+    "correct_hadith_plain": {
+      "correct": 2
+    },
+    "long_hadith": {
+      "correct": 2
+    },
+    "modified_hadith": {
+      "detected": 6
+    },
+    "famous_hadith": {
+      "correct": 5
+    },
+    "famous_too_short": {
+      "guard_ok": 1
+    },
+    "hadith_outside_scope": {
+      "rejected": 2
+    },
+    "popular_unsourced": {
+      "rejected": 2
+    },
+    "pseudo_quran": {
+      "rejected": 5
+    },
+    "general_fabricated": {
+      "rejected": 5
+    },
+    "short_input": {
+      "guard_ok": 2
+    }
+  }
+}
