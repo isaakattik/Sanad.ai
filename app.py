@@ -46,7 +46,7 @@ def verify(req: VerifyRequest):
         tokens.append({"t": tok, "bad": bool(norm) and norm in bad_words})
 
     others = [{"reference": reference_label(c), "score": round(c["score"], 1),
-               "status": c["match_type"]}
+               "status": c["match_type"], "text": c.get("text", "")}
               for c in res["all_candidates"] if c["match_type"] != "no_reference"
               and c is not res["best_match"]][:3]
 
