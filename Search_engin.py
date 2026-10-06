@@ -1,4 +1,3 @@
-
 from difflib import SequenceMatcher
 from rapidfuzz import fuzz, process
 import json
@@ -18,30 +17,64 @@ if hadith_file_path.exists():
             hadith_dataset = json.load(f)
     
     
-    
-WINDOW_SIZE = 30   
-WINDOW_STEP = 15   
 
-hadith_windows = []     
-hadith_window_map = []  
+
+WINDOW_SIZE = 40       
+WINDOW_STEP = 10       
+RETRIEVAL_WORDS = 30  
+MAX_VERIFY_WORDS = 150 
+
+
+def window_starts(n_words: int) -> list:
+
+    if n_words <= WINDOW_SIZE:
+        return [0]
+    starts = list(range(0, n_words - WINDOW_SIZE + 1, WINDOW_STEP))
+    if starts[-1] != n_words - WINDOW_SIZE:
+        starts.append(n_words - WINDOW_SIZE)
+    return starts
+
+
+hadith_windows = []      
+hadith_window_map = []   
 
 for idx, h in enumerate(hadith_dataset):
     words = h["norma_text"].split()
-    if len(words) <= WINDOW_SIZE:
-
-        hadith_windows.append(h["norma_text"])
+    for start in window_starts(len(words)):
+        hadith_windows.append(" ".join(words[start:start + WINDOW_SIZE]))
         hadith_window_map.append(idx)
-    else:
 
-        for start in range(0, len(words) - WINDOW_SIZE + 1, WINDOW_STEP):
-            window_text = " ".join(words[start:start + WINDOW_SIZE])
-            hadith_windows.append(window_text)
-            hadith_window_map.append(idx)    
-    
-    
-    
-    
-    
+
+
+from bisect import bisect_right
+
+HADITH_SEP = " | "      # never appears in normalized text
+hadith_blob = HADITH_SEP.join(h["norma_text"] for h in hadith_dataset)
+hadith_offsets, _pos = [], 0
+for _h in hadith_dataset:
+    hadith_offsets.append(_pos)
+    _pos += len(_h["norma_text"]) + len(HADITH_SEP)
+
+
+def exact_hadith_indices(query: str, max_hits: int = 5) -> list:
+    """Indices of hadith whose normalized text contains `query` on WORD boundaries
+    (a single attached prefix letter و/ف/ب/ل/ك on the first word is tolerated)."""
+    hits, start = [], 0
+    while len(hits) < max_hits:
+        k = hadith_blob.find(query, start)
+        if k == -1:
+            break
+        idx = bisect_right(hadith_offsets, k) - 1
+        end = k + len(query)
+        end_ok = end >= len(hadith_blob) or hadith_blob[end] in " |"
+        before = hadith_blob[k - 1] if k > 0 else " "
+        before2 = hadith_blob[k - 2] if k > 1 else " "
+        start_ok = before in " |" or (before in "وفبلك" and before2 in " |")
+        if end_ok and start_ok and idx not in hits:
+            hits.append(idx)
+        start = hadith_offsets[idx + 1] if idx + 1 < len(hadith_offsets) else len(hadith_blob)
+    return hits
+
 
 def find_exact(input_user:str, quran_data:str, min_word=3, status_callback=None):
     
@@ -79,35 +112,43 @@ quran_normalized = [ayah["norma_text"] for ayah in dataset]
 hadith_normalized = [h["norma_text"] for h in hadith_dataset]
 
 def find_hadith_fuzzy(
-    user_input:str, limit:int=5, candidate_pull_size =60 , 
-    min_word=3, threshold=85, status_callback = None, hadith_normalized= hadith_normalized, max_query_words:int = 50, window_ouverlap:int = 12,
-    ) ->list :
+    user_input: str, limit: int = 5, candidate_pull_size: int = 60,
+    min_word: int = 3, threshold: int = 85, status_callback=None,
+    retrieval_words: int = RETRIEVAL_WORDS,
+) -> list:
+    
     
     normalized_input = normalize_arabic(user_input)
     user_words = normalized_input.split()
-    
-    if len(user_words) > max_query_words:
-        user_words = user_words[:max_query_words]
-    normalized_input = " ".join(user_words)
-    
-    
+
     if len(user_words) < min_word or not hadith_dataset:
-        
         if status_callback:
             status_callback(t("status_too_short"))
         return []
-            
-    if len(user_words) > max_query_words:
-        user_words = user_words[:max_query_words]
-        normalized_input = " ".join(user_words)        
-    
+
+    user_words = user_words[:MAX_VERIFY_WORDS]
+    normalized_input = " ".join(user_words)
+
+    # fast path: the quote is a verbatim piece of one or more hadith
+    exact_hits = exact_hadith_indices(normalized_input)
+    if exact_hits:
+        out = []
+        for idx in exact_hits:
+            h = hadith_dataset[idx]
+            out.append({"source_type": "hadith", "source_book": h["source"],
+                        "hadith_number": h["hadith_number"], "text": h["text"],
+                        "text_normalized": h["norma_text"], "score": 100.0,
+                        "coverage": 1.0, "differences": [], "match_type": "matched"})
+        return out[:limit]
+
+    retrieval_query = " ".join(user_words[:retrieval_words])
     matches = process.extract(
-        normalized_input,
+        retrieval_query,
         hadith_windows,
-        scorer = fuzz.partial_ratio,
-        limit = candidate_pull_size
+        scorer=fuzz.partial_ratio,
+        limit=candidate_pull_size,
     )
-    
+
     results = []
     seen_indices = set()
     for item in matches:
