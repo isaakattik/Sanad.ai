@@ -1,4 +1,6 @@
-
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
 rapidfuzz
 requests
-python-dotenv
