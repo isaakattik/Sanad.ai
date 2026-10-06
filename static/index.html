@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>سَنَد — الموثِّق</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5efe0;--card:#fffdf6;--ink:#10302a;--mute:#5d6f69;--line:#e3d9bf;--em:#0d5c4b;--em2:#0a4639;--gold:#b88a2e;
+--ok:#0d6b4f;--okbg:#e2f3ea;--warn:#8a5a00;--warnbg:#fdf0cf;--none:#3d4a63;--nonebg:#e8ecf4;--hl:#f6c453;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#08201b;--card:#0d2c25;--ink:#efe8d3;--mute:#9db3ab;--line:#1d4a3f;--em:#3fb08f;--em2:#2a8b70;--gold:#d9b25a;
+--ok:#7be0b8;--okbg:#0f3b2f;--warn:#f3c969;--warnbg:#3a2e0c;--none:#b9c6e4;--nonebg:#1a2742;--hl:#a9791a}}
+:root[data-theme=dark]{--bg:#08201b;--card:#0d2c25;--ink:#efe8d3;--mute:#9db3ab;--line:#1d4a3f;--em:#3fb08f;--em2:#2a8b70;--gold:#d9b25a;--ok:#7be0b8;--okbg:#0f3b2f;--warn:#f3c969;--warnbg:#3a2e0c;--none:#b9c6e4;--nonebg:#1a2742;--hl:#a9791a}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Tajawal,system-ui,sans-serif;line-height:1.8;min-height:100vh}
+.hero{position:relative;background:linear-gradient(160deg,#0a4639,#0d5c4b 60%,#12705b);color:#f6efd9;padding:28px 20px 90px;overflow:hidden}
+.hero:before{content:"";position:absolute;inset:0;opacity:.13;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.2'%3E%3Cpath d='M40 6l9 21 21-9-9 21 21 9-21 9 9 21-21-9-9 21-9-21-21 9 9-21-21-9 21-9-9-21 21 9z'/%3E%3Ccircle cx='40' cy='40' r='9'/%3E%3C/g%3E%3C/svg%3E")}
+.wrap{max-width:860px;margin:0 auto;position:relative;padding-inline:4px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .name{font-family:Amiri,serif;font-size:2.4rem;font-weight:700;line-height:1;color:#f1d78e}
+.brand .sub{font-size:.95rem;opacity:.85;border-inline-start:1px solid #f1d78e66;padding-inline-start:12px}
+.hero h1{font-family:Amiri,serif;font-size:clamp(1.6rem,4.6vw,2.5rem);margin:34px 0 4px;font-weight:700;line-height:1.5}
+.hero p{margin:0;max-width:560px;opacity:.9}
+main{max-width:860px;margin:-62px auto 40px;padding:0 16px;position:relative}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 10px 30px -18px #0a2a22aa}
+textarea{width:100%;min-height:150px;resize:vertical;border:1.5px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);
+font:inherit;font-family:Amiri,serif;font-size:1.35rem;line-height:2;padding:12px 14px;outline:none;transition:border-color .2s,box-shadow .2s}
+textarea:focus{border-color:var(--em);box-shadow:0 0 0 4px #0d5c4b22}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.9rem;color:var(--mute)}
+.chip{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:3px 12px;font:inherit;font-size:.88rem;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--gold);color:var(--gold)}
+.btn{background:var(--em);color:#fff;border:0;border-radius:12px;padding:10px 30px;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer;display:inline-flex;gap:8px;align-items:center;transition:.15s}
+.btn:hover{background:var(--em2);transform:translateY(-1px)}.btn:disabled{opacity:.6;cursor:wait;transform:none}
+.spin{width:16px;height:16px;border:2.5px solid #fff6;border-top-color:#fff;border-radius:50%;animation:s .7s linear infinite;display:none}
+.btn.load .spin{display:inline-block}@keyframes s{to{transform:rotate(360deg)}}
+.count{font-size:.8rem;color:var(--mute)}
+#out{margin-top:22px;display:none}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#out>*{animation:up .35s both}
+.status{display:flex;gap:16px;align-items:center;padding:18px 20px;border-radius:16px;border:1px solid transparent}
+.status .ic{font-size:1.6rem;width:50px;height:50px;border-radius:50%;display:grid;place-items:center;background:#ffffffaa;color:inherit;flex:none;font-weight:800}
+.status h2{margin:0;font-size:1.35rem;line-height:1.4}.status p{margin:2px 0 0;font-size:.95rem}
+.ok{background:var(--okbg);color:var(--ok);border-color:#0d6b4f33}.warn{background:var(--warnbg);color:var(--warn);border-color:#8a5a0033}.none{background:var(--nonebg);color:var(--none);border-color:#3d4a6333}
+.sec{margin-top:16px}.lbl{font-size:.82rem;color:var(--gold);font-weight:700;letter-spacing:.02em;margin-bottom:6px}
+.ref{font-family:Amiri,serif;font-size:1.5rem;font-weight:700;color:var(--em)}
+.src{font-family:Amiri,serif;font-size:1.4rem;line-height:2.1;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 16px;max-height:260px;overflow:auto}
+.tok{display:inline}.tok.bad{background:var(--hl);color:#2a1d00;border-radius:6px;padding:0 5px;box-shadow:0 2px 0 #b8782e}
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.meter .bar{height:8px;border-radius:9px;background:var(--line);overflow:hidden}.meter .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--em));width:0;transition:width .8s}
+.meter b{font-size:1.15rem}
+.diff{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;border-bottom:1px dashed var(--line);padding:8px 0}
+.tag{font-size:.78rem;border-radius:6px;padding:1px 9px;background:var(--warnbg);color:var(--warn);font-weight:700}
+.w{font-family:Amiri,serif;font-size:1.2rem}.w.u{text-decoration:line-through;text-decoration-color:#c0392b;opacity:.85}.w.s{color:var(--ok);font-weight:700}
+.others{font-size:.92rem;color:var(--mute)}
+.note{margin-top:26px;text-align:center;font-size:.85rem;color:var(--mute);padding:0 16px 30px}
+.note b{color:var(--gold)}
+.err{color:#c0392b;margin-top:10px}
+@media(max-width:560px){.meters{grid-template-columns:1fr}.btn{width:100%;justify-content:center}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <div class="brand">
+    <svg width="46" height="46" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="#f1d78e" stroke-width="5"><rect x="18" y="18" width="64" height="64"/><rect x="18" y="18" width="64" height="64" transform="rotate(45 50 50)"/></g><circle cx="50" cy="50" r="8" fill="#f1d78e"/></svg>
+    <span class="name">سَنَد</span><span class="sub">الموثِّق</span>
+  </div>
+  <h1>تحقّق من نصٍّ يُنسب إلى القرآن أو الحديث</h1>
+  <p>ألصق الاقتباس، فنبحث عنه في المصحف وفي الصحيحين، ونُظهر لك أيّ كلمةٍ تخالف الأصل.</p>
+</div></header>
+
+<main>
+  <section class="card">
+    <textarea id="q" placeholder="ألصق هنا الآية أو الحديث…" maxlength="3000" aria-label="النص المراد التحقق منه"></textarea>
+    <div class="row">
+      <div class="chips"><span>جرّب:</span>
+        <button class="chip" data-ex="فَإِنَّ مَعَ الْعُسْرِ يُسْرًا">آية صحيحة</button>
+        <button class="chip" data-ex="فَإِنَّ مَعَ الْعُسْرِ سهلا">آية معدَّلة</button>
+        <button class="chip" data-ex="إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى">حديث</button>
+        <button class="chip" data-ex="النظافة من الإيمان">حديث غير معتمد</button>
+      </div>
+      <span class="count" id="cnt">0 / 3000</span>
+    </div>
+    <div class="row"><span></span>
+      <button class="btn" id="go"><span class="spin"></span><span id="gol">تحقّق</span></button>
+    </div>
+    <div class="err" id="err" role="alert"></div>
+    <div id="out" aria-live="polite"></div>
+  </section>
+  <p class="note"><b>أداة مساعدة للتحقق السريع</b> — لا تغني عن الرجوع إلى أهل العلم والمصادر الأصلية.<br>المصادر المعتمدة: القرآن الكريم، صحيح البخاري، صحيح مسلم.</p>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+const ST = {
+  matched:{c:"ok", i:"✓", t:"مطابق", d:"النص موافق لما في المصدر (بعد توحيد التشكيل والهمزات)."},
+  matched_with_diff:{c:"warn", i:"≠", t:"مطابق مع اختلاف", d:"وجدنا المصدر، لكن في نصّك كلمات تخالف الأصل — راجع الفروق أدناه."},
+  no_reference:{c:"none", i:"؟", t:"لا مرجع", d:"لم نجد مطابقة موثوقة في المصادر المعتمدة، فامتنعنا عن الجزم. هذا ليس حكمًا على صحة النص."},
+  too_short:{c:"none", i:"…", t:"النص قصير", d:"أدخل ثلاث كلمات على الأقل ليكون التحقق ذا معنى."}
+};
+const DT = {replace:"استبدال", delete:"زيادة في نصّك", insert:"نقص من نصّك"};
+
+function h(tag, cls, txt){ const e = document.createElement(tag); if(cls) e.className = cls; if(txt!=null) e.textContent = txt; return e; }
+function sec(label, ...kids){ const s = h("div","sec"); s.append(h("div","lbl",label), ...kids); return s; }
+function meter(label, val){ const m = h("div","meter"), b = h("b","",Math.round(val*100)/100 + "%"), bar = h("div","bar"), i = h("i");
+  bar.append(i); m.append(h("div","lbl",label), b, bar); requestAnimationFrame(()=>requestAnimationFrame(()=>{ i.style.width = Math.min(100,val)+"%"; })); return m; }
+
+function render(r){
+  const out = $("#out"), st = ST[r.status] || ST.no_reference, b = r.best_match;
+  out.replaceChildren(); out.style.display = "block";
+  const box = h("div","status "+st.c), ic = h("div","ic",st.i), tx = h("div");
+  tx.append(h("h2","",st.t), h("p","",st.d)); box.append(ic, tx); out.append(box);
+  if(!b) return;
+
+  out.append(sec(r.source_type==="quran" ? "الموضع في القرآن" : "الموضع في الحديث", h("div","ref",b.reference)));
+  const mt = h("div","meters");
+  mt.append(meter("نسبة التشابه", b.score), meter("نسبة التغطية", b.coverage*100));
+  out.append(sec("القياس", mt));
+
+  if(r.status==="matched_with_diff"){
+    const mine = h("div","src"); r.tokens.forEach(k=>{ mine.append(h("span","tok"+(k.bad?" bad":""),k.t), " "); });
+    out.append(sec("نصّك (الكلمات المخالفة مظلَّلة)", mine));
+    const list = h("div");
+    b.differences.forEach(d=>{
+      const row = h("div","diff"), src = (d.hadith_words||d.ayah_words||[]).join(" "), usr = (d.user_words||[]).join(" ");
+      row.append(h("span","tag",DT[d.type]||d.type));
+      if(usr) row.append(h("span","w u",usr));
+      if(src) row.append("←", h("span","w s",src));
+      list.append(row);
+    });
+    out.append(sec("الفروق (بعد توحيد التشكيل)", list));
+  }
+  out.append(sec("نصّ المصدر الكامل", h("div","src",b.text)));
+  if(r.others.length){
+    out.append(sec("مواضع محتملة أخرى", h("div","others", r.others.map(o=>o.reference+" ("+o.score+"%)").join(" · "))));
+  }
+}
+
+async function verify(){
+  const text = $("#q").value.trim(); $("#err").textContent = "";
+  if(!text){ $("#err").textContent = "ألصق نصًّا أولًا."; return; }
+  const btn = $("#go"); btn.disabled = true; btn.classList.add("load"); $("#gol").textContent = "جارٍ التحقق…";
+  try{
+    const res = await fetch("/api/verify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text})});
+    if(!res.ok) throw new Error(res.status);
+    render(await res.json());
+    $("#out").scrollIntoView({behavior:"smooth",block:"nearest"});
+  }catch(e){ $("#err").textContent = "تعذّر الاتصال بالخادم. حاول مرة أخرى."; }
+  finally{ btn.disabled = false; btn.classList.remove("load"); $("#gol").textContent = "تحقّق"; }
+}
+$("#go").onclick = verify;
+$("#q").addEventListener("input", e => $("#cnt").textContent = e.target.value.length + " / 3000");
+$("#q").addEventListener("keydown", e => { if(e.key==="Enter" && (e.ctrlKey||e.metaKey)) verify(); });
+document.querySelectorAll(".chip").forEach(c => c.onclick = () => { $("#q").value = c.dataset.ex; $("#q").dispatchEvent(new Event("input")); verify(); });
+</script>
+</body>
+</html>
